@@ -1,0 +1,29 @@
+import numpy as np
+import cv2
+from skimage import measure
+
+def extract_objects_and_volumes(image_path, threshold=128):
+    # Load image in grayscale
+    img = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
+    # Threshold to binary
+    _, binary = cv2.threshold(img, threshold, 255, cv2.THRESH_BINARY)
+    # Label connected components
+    labels = measure.label(binary, connectivity=2)
+    # Measure properties
+    props = measure.regionprops(labels)
+    # Extract volumes (area in 2D, volume in 3D)
+    volumes = [prop.area for prop in props]
+    return labels, volumes
+
+def compute_overlap(labels1, labels2):
+    # Overlap mask
+    overlap = (labels1 > 0) & (labels2 > 0)
+    overlap_area = np.sum(overlap)
+    return overlap_area
+
+# Example usage:
+# labels1, volumes1 = extract_objects_and_volumes('object1.png')
+# labels2, volumes2 = extract_objects_and_volumes('object2.png')
+# overlap_area = compute_overlap(labels1, labels2)
+# print("Volumes:", volumes1)
+# print("Overlap area:", overlap_area)
